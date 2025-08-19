@@ -1,0 +1,57 @@
+services:
+
+  backend:
+    depends_on:
+      - db
+    build: 
+      # have the build context here so it can see frontend dir
+      context: .
+      dockerfile: backend/Dockerfile
+    image: aramk0/back_end
+    container_name: back_end
+    pull_policy: never
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - SENDER_PASSWORD=${SENDER_PASSWORD}
+    
+   #at 127.0.0.1:8000 instead of localhost:8000 due to wsl2
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/health || exit 1"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+      
+    #watches for realtime changes in these frontend files
+    develop:
+      watch:
+        - path: app/frontend/templates
+          target: app/frontend/templates
+          action: sync
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+    # these are bind mounts
+     - ./logs:/app/logs
+     - ./frontend:/app/frontend
+     - ./backend:/app/backend
+     - ./tests:/app/tests
+  db:
+    image: postgres:15
+    container_name: uos_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+    ports:
+      - 127.0.0.1:5432:5432
+volumes:
+  pgdata:
