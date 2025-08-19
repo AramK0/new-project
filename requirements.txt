@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+anthropic
+openai
+Jinja2
+dotenv
+httpx
+pytest
+pyyaml
+sqlalchemy 
+aiosqlite 
+psycopg2-binary
+flake8
+python-multipart
+pydantic
+pydantic[email]
+numpy
